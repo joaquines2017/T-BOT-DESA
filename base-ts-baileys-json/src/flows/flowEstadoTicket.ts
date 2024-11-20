@@ -22,7 +22,8 @@ export const flowEstadoTicket = addKeyword(['2'])
                 const { status, assignedTo } = ticket;
 
                 // Enviamos la información del ticket al usuario
-                await provider.sendMessage(ctx.from, `El estado del ticket es: ${status}\nAsignado a: ${assignedTo}`, {});
+                await provider.sendMessage(ctx.from, `*El estado del ticket es:* ${status}`, {});
+                await provider.sendMessage(ctx.from, `*Asignado a:* ${assignedTo}`, {});
             } else {
                 // Si no se encuentra el ticket
                 await provider.sendMessage(ctx.from, 'No se encontró ningún ticket con ese ID.', {});
