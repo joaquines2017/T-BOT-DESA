@@ -2,10 +2,10 @@ import { addKeyword } from '@builderbot/bot';
 import { handleCreateTicket } from '../controllers/ticketController';
 
 // Define el tipo del estado personalizado
-//interface TicketCreationState {
-    let problemType;
-    let description;
-//}
+interface TicketCreationState {
+    problemType?: string;
+    description?: string;
+}
 
 const tecnicos = [
     { id: 68, nombre: 'Néstor' },
@@ -29,7 +29,7 @@ export const flowCrearTicket = addKeyword(['1'])
 
             // Guardamos la primera respuesta en el estado
             //ctx.state.problemType = ctx.body;
-             problemType = ctx.body;
+            const problemType = ctx.body;
             console.log('Primera respuesta capturada:', problemType);
         }
     )
@@ -39,14 +39,14 @@ export const flowCrearTicket = addKeyword(['1'])
         async (ctx) => {
             // Guardamos la segunda respuesta en el estado
             //ctx.state.description = ctx.body;
-            description = ctx.body;
+            const description = ctx.body;
             console.log('Segunda respuesta capturada:', description);
         }
     )
     .addAction(async (ctx, { flowDynamic }) => {
         try {
-            //const { problemType, description } = ctx.state as TicketCreationState;
-           // const { problemType, description } = ctx.state;
+            const { problemType, description } = ctx.body as TicketCreationState;
+
             if (!problemType || !description) {
                 await flowDynamic('❌ No se pudieron capturar todos los datos. Inténtalo de nuevo.');
                 return;
@@ -67,7 +67,7 @@ console.log(subjectD);
                 priorityId: 2, // Prioridad del ticket
                 statusId: 7, // Estado del ticket
                 subject: subjectD,
-                description: null,
+                description: `Tipo de problema: ${problemType}. Descripción: ${description}.`,
             });
 
             if (ticket) {

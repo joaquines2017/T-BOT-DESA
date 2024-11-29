@@ -1,0 +1,41 @@
+import { addKeyword } from '@builderbot/bot';
+import { handleCreateTicket } from '../controllers/ticketController';
+
+let technicianId = 1; // Variable global para asignar técnicos de forma secuencial
+
+export const flowCrearTicket = addKeyword(['crear ticket'])
+    .addAnswer('¡Vamos a crear un ticket! Primero, proporciona una breve descripción del problema:', { capture: true })
+    .addAction(async (ctx, { flowDynamic }) => {
+        const responses = [];
+        responses.push(ctx.capture?.[0]);
+
+        await flowDynamic('¿Qué tipo de problema es? (Ejemplo: CPU, impresora, monitor, etc.)', {capture:true});
+        responses.push(ctx.capture?.[1]);
+
+        await flowDynamic('Proporcione más detalles si es necesario.', {capture:true});
+        responses.push(ctx.capture?.[2]);
+
+        const subject = responses.filter(Boolean).join(' - ');
+
+        // Asignación secuencial del técnico
+        technicianId = technicianId > 10 ? 1 : technicianId;
+
+        // Llamamos al controlador para crear el ticket
+        const ticket = await handleCreateTicket({
+            authorId: 55, // Autor fijo
+            projectId: 33,
+            trackerId: 26,
+            assignedToId: technicianId,
+            priorityId: 2,
+            statusId: 7, // Estado fijo
+            subject,
+            description: `Descripción completa proporcionada por el usuario: ${responses.join('. ')}`,
+        });
+
+        if (ticket) {
+            technicianId++; // Incrementar para el próximo técnico
+            await flowDynamic(`✅ Ticket creado exitosamente con ID: ${ticket.id}`);
+        } else {
+            await flowDynamic('❌ Hubo un error al crear el ticket. Intenta nuevamente.');
+        }
+    });

@@ -3,7 +3,7 @@ import { addKeyword } from '@builderbot/bot';
 import { handleGetTicketStatus } from '../controllers/ticketController';
 
 export const flowEstadoTicket = addKeyword(['2'])
-    .addAnswer('Por favor, proporciona el ID del ticket.', { capture: true }) // Usamos `capture: true` para esperar la entrada del usuario
+    .addAnswer('Por favor, proporciona el ID del ticket📋.', { capture: true }) // Usamos `capture: true` para esperar la entrada del usuario
     .addAction(async (ctx, { provider }) => {
         // Capturamos la entrada del usuario y la procesamos
         const userMessage = ctx.body.trim(); // Captura el mensaje y elimina espacios innecesarios
@@ -11,7 +11,7 @@ export const flowEstadoTicket = addKeyword(['2'])
 
         // Validamos que el ID proporcionado sea un número válido
         if (isNaN(issueId)) {
-            await provider.sendMessage(ctx.from, 'El ID del ticket no es válido. Por favor, proporciona un número válido.', {});
+            await provider.sendMessage(ctx.from, 'El ID del ticket no es válido 🚫. Por favor, proporciona un número válido ✅.', {});
             return;
         }
 
@@ -29,6 +29,6 @@ export const flowEstadoTicket = addKeyword(['2'])
         } catch (error) {
             console.error('Error al consultar el estado del ticket:', error);
             // Enviar un mensaje de error al usuario
-            await provider.sendMessage(ctx.from, 'Hubo un problema al consultar el estado del ticket. Inténtalo de nuevo más tarde.', {});
+            await provider.sendMessage(ctx.from, 'Hubo un problema 🚨 al consultar el estado del ticket📋. Inténtalo de nuevo más tarde🕖.', {});
         }
     });

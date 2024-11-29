@@ -1,0 +1,45 @@
+import { addKeyword } from '@builderbot/bot';
+import { handleCreateTicket } from '../controllers/ticketController';
+
+export const flowCrearTicket = addKeyword(['1'])
+    .addAnswer('Bienvenido al sistema de creación de tickets. ¿Qué tipo de problema tienes?')
+//    .addAnswer('Opciones: CPU, impresora, monitor, internet, otros.', { capture: true })
+    .addAnswer('Por favor, proporciona una breve descripción del problema:', { capture: true })
+    .addAction(async (ctx, { flowDynamic }) => {
+        try {
+            // Capturamos las respuestas del usuario
+            //const taskType = ctx.capture?.[0]?.toLowerCase();
+            const taskType = "incidente";
+            const description = ctx.capture?.[0];
+
+            // Validamos la entrada del usuario
+            if (!taskType || !description) {
+                await flowDynamic('❌ No se pudieron capturar todos los datos. Inténtalo de nuevo.');
+                return;
+            }
+
+            // Creamos un JSON con los datos
+            const ticketData = {
+                projectId: 1, // Puedes ajustar esto o capturarlo dinámicamente
+                subject: `Problema con ${taskType}`,
+                description,
+            };
+
+            // Impactamos en Redmine usando la API
+            const ticket = await handleCreateTicket(
+                ticketData.projectId,
+                ticketData.subject,
+                ticketData.description
+            );
+
+            // Respondemos al usuario
+            if (ticket) {
+                await flowDynamic(`✅ Ticket creado con éxito. ID: ${ticket.id}`);
+            } else {
+                await flowDynamic('❌ No se pudo crear el ticket. Inténtalo más tarde.');
+            }
+        } catch (error) {
+            console.error('Error en el flujo de creación de ticket:', error);
+            await flowDynamic('❌ Ocurrió un error. Inténtalo más tarde.');
+        }
+    });

@@ -1,11 +1,6 @@
 import { addKeyword } from '@builderbot/bot';
 import { handleCreateTicket } from '../controllers/ticketController';
-
-// Define el tipo del estado personalizado
-//interface TicketCreationState {
-    let problemType;
-    let description;
-//}
+import { text } from 'stream/consumers';
 
 const tecnicos = [
     { id: 68, nombre: 'Néstor' },
@@ -20,33 +15,16 @@ const tecnicos = [
 ];
 
 export const flowCrearTicket = addKeyword(['1'])
-    .addAnswer(
-        'Bienvenido al sistema de creación de tickets. ¿Qué tipo de problema tienes?',
-        { capture: true },
-        async (ctx) => {
-            // Inicializamos el estado si no existe
-           // ctx.state = ctx.state || {};
-
-            // Guardamos la primera respuesta en el estado
-            //ctx.state.problemType = ctx.body;
-             problemType = ctx.body;
-            console.log('Primera respuesta capturada:', problemType);
-        }
-    )
-    .addAnswer(
-        'Por favor, proporciona una breve descripción del problema:',
-        { capture: true },
-        async (ctx) => {
-            // Guardamos la segunda respuesta en el estado
-            //ctx.state.description = ctx.body;
-            description = ctx.body;
-            console.log('Segunda respuesta capturada:', description);
-        }
-    )
+    .addAnswer('Bienvenido al sistema de creación de tickets. ¿Qué tipo de problema tienes?', { capture: true })
+    .addAnswer('Por favor, proporciona una breve descripción del problema:', { capture: true })
     .addAction(async (ctx, { flowDynamic }) => {
         try {
-            //const { problemType, description } = ctx.state as TicketCreationState;
-           // const { problemType, description } = ctx.state;
+            // Capturamos las respuestas del usuario desde `ctx.body`
+            const problemType = ctx.bot.text[0].trim();  // Primera respuesta: tipo de problema
+            const description = ctx.body.text[1].trim();  // Segunda respuesta: descripción del problema
+console.log(problemType);
+console.log('Contenido de ctx.body:', ctx[0]);
+            // Verificamos que ambas respuestas existan y no estén vacías
             if (!problemType || !description) {
                 await flowDynamic('❌ No se pudieron capturar todos los datos. Inténtalo de nuevo.');
                 return;
@@ -57,17 +35,18 @@ export const flowCrearTicket = addKeyword(['1'])
 
             // Creamos el subject para el ticket
             const subjectD = `Problema: ${problemType} - Detalles: ${description}`;
-console.log(subjectD);
+
             // Creamos el ticket utilizando la función del controlador
             const ticket = await handleCreateTicket({
-                authorId: 55, // Ajusta según corresponda
-                projectId: 33, // Ajusta según corresponda
-                trackerId: 26, // Ajusta según corresponda
-                assignedToId: tecnicoAsignado.id, // Técnico asignado aleatoriamente
-                priorityId: 2, // Prioridad del ticket
-                statusId: 7, // Estado del ticket
-                subject: subjectD,
-                description: null,
+                authorId: 55,  // Este es el ID del creador del ticket, ajustalo según corresponda
+                projectId: 33, // Este es el ID del proyecto, ajustalo según corresponda
+                trackerId: 26, // Ajusta este ID según corresponda
+                assignedToId: tecnicoAsignado.id,  // Asignamos aleatoriamente el técnico
+                priorityId: 2,  // Ajusta según la prioridad del ticket
+                statusId: 7,  // Ajusta el estado del ticket
+                subject: `${subjectD}`,
+                description: `Tipo de problema: ${problemType}. Descripción: ${description}.`,
+                //description: null,
             });
 
             if (ticket) {

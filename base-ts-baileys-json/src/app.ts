@@ -6,10 +6,10 @@ import { flowBienvenido } from './flows/flowBienvenido';
 import { flowCrearTicket } from './flows/flowCrearTicket';
 import { flowEstadoTicket } from './flows/flowEstadoTicket';
 import { flowEliminarTicket } from './flows/flowEliminarTicket';
-
+import { flowVerIssues} from './flows/flowAllIssues';
 const main = async () => {
     const adapterDB = new MemoryDB();
-    const adapterFlow = createFlow([flowBienvenido, flowCrearTicket, flowEstadoTicket, flowEliminarTicket]);
+    const adapterFlow = createFlow([flowBienvenido, flowCrearTicket, flowEstadoTicket, flowEliminarTicket, flowVerIssues]);
     const adapterProvider = createProvider(BaileysProvider);
 
     const { handleCtx, httpServer } = await createBot({
@@ -18,7 +18,7 @@ const main = async () => {
         database: adapterDB,
     });
 
-    httpServer(3000); // Servidor HTTP en el puerto 3000
+    httpServer(3001); // Servidor HTTP en el puerto 3000
 };
 
 main();

@@ -15,7 +15,8 @@ export const getProjects = async () => {
         return [];
     }
 };
-
+//Comentado por joaquin para probar nueva función 
+/*
 export const createTicket = async (projectId: number, subject: string, description: string) => {
     try {
         const response = await axios.post(`${REDMINE_API_URL}/issues.json`, {
@@ -25,10 +26,47 @@ export const createTicket = async (projectId: number, subject: string, descripti
         });
         return response.data.issue;
     } catch (error) {
-        console.error('Error al crear el ticket:', error);
+        console.error('Error al crear el ticket:', error.response?.data || error.message);
+        //return null;
+        throw new Error('No se pudo crear el ticket.');
+    }
+};*/
+export const createTicket = async (ticketData: {
+    authorId: number;
+    projectId: number;
+    trackerId: number;
+    assignedToId: number;
+    priorityId: number;
+    statusId: number;
+    subject: string;
+    description: string;
+}) => {
+    try {
+        const response = await axios.post(
+            `${REDMINE_API_URL}/issues.json`,
+            {
+                issue: {
+                    author_id: ticketData.authorId,
+                    project_id: ticketData.projectId,
+                    tracker_id: ticketData.trackerId,
+                    assigned_to_id: ticketData.assignedToId,
+                    priority_id: ticketData.priorityId,
+                    status_id: ticketData.statusId,
+                    subject: ticketData.subject,
+                    description: ticketData.description,
+                },
+            },
+            {
+                headers: { 'X-Redmine-API-Key': API_KEY },
+            }
+        );
+        return response.data.issue;
+    } catch (error) {
+        console.error('Error al crear el ticket:', error.response?.data || error);
         return null;
     }
 };
+
 export const getTicketStatus = async (issueId: number) => {
     try {
         const response = await axios.get(`${REDMINE_API_URL}/issues/${issueId}.json`, {
@@ -70,5 +108,30 @@ export const deleteTicket = async (issueId: number) => {
     } catch (error) {
         console.error('Error al eliminar el ticket:', error);
         return 'Error al eliminar el ticket.';
+    }
+};
+
+export const getAllIssues = async () => {
+    try {
+        const response = await axios.get(`${REDMINE_API_URL}/issues.json`, {
+            headers: { 'X-Redmine-API-Key': API_KEY }
+        });
+        return response.data.issues; // Retorna la lista de issues
+    } catch (error) {
+        console.error('Error al obtener los tickets:', error);
+        return [];
+    }
+};
+
+// Obtener un issue específico
+export const getIssueById = async (issueId: number) => {
+    try {
+        const response = await axios.get(`${REDMINE_API_URL}/issues/${issueId}.json`, {
+            headers: { 'X-Redmine-API-Key': API_KEY }
+        });
+        return response.data.issue; // Retorna los detalles del issue
+    } catch (error) {
+        console.error(`Error al obtener el ticket con ID ${issueId}:`, error);
+        return null;
     }
 };
